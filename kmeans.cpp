@@ -82,17 +82,25 @@ int main(int argc, char* argv[])
 		final_assignments[cluster].push_back(i);
 	}
 
-	ofstream o_file;
-	o_file.open(output_file);
-	for(int i = 0; i < k; i ++)
+	// ofstream o_file;
+	// o_file.open(output_file);
+	// for(int i = 0; i < k; i ++)
+	// {
+	// 	o_file << "#" << i << endl;
+	// 	for(int j = 0; j < final_assignments[i].size(); j++)
+	// 	{
+	// 		o_file << final_assignments[i][j] << endl;
+	// 	}
+	// }
+	// o_file.close();
+
+	ofstream check_file;
+	check_file.open("kmeans_labels.txt");
+	for(int i = 0; i < num_points; i ++)
 	{
-		o_file << "#" << i << endl;
-		for(int j = 0; j < final_assignments[i].size(); j++)
-		{
-			o_file << final_assignments[i][j] << endl;
-		}
+		check_file << cluster_assignments[i] << endl;
 	}
-	o_file.close();
+	check_file.close();
 
 
 
