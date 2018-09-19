@@ -64,6 +64,8 @@ int main(int argc, char* argv[])
 		// update centres
 		update_centres(&centres, &cluster_assignments, &data_points);
 		num_iter ++;
+		// if(num_iter == 100)
+			// break;
 	}
 
 	cout << "num_iter = " << num_iter << endl;
@@ -82,17 +84,25 @@ int main(int argc, char* argv[])
 		final_assignments[cluster].push_back(i);
 	}
 
-	ofstream o_file;
-	o_file.open(output_file);
-	for(int i = 0; i < k; i ++)
+	// ofstream o_file;
+	// o_file.open(output_file);
+	// for(int i = 0; i < k; i ++)
+	// {
+	// 	o_file << "#" << i << endl;
+	// 	for(int j = 0; j < final_assignments[i].size(); j++)
+	// 	{
+	// 		o_file << final_assignments[i][j] << endl;
+	// 	}
+	// }
+	// o_file.close();
+
+	ofstream check_file;
+	check_file.open("kmeans_labels.txt");
+	for(int i = 0; i < num_points; i ++)
 	{
-		o_file << "#" << i << endl;
-		for(int j = 0; j < final_assignments[i].size(); j++)
-		{
-			o_file << final_assignments[i][j] << endl;
-		}
+		check_file << cluster_assignments[i] << endl;
 	}
-	o_file.close();
+	check_file.close();
 
 
 
@@ -104,6 +114,7 @@ int main(int argc, char* argv[])
 vector<vector<float> > initialize_centres(int k, vector<vector<float> >* data_points)
 {
 	// random initialisation --> replace with kmeans++?
+	
 	// vector<int> indices;
 	// int num_points = (*data_points).size();
 	// while(indices.size() != k)
@@ -125,27 +136,27 @@ vector<vector<float> > initialize_centres(int k, vector<vector<float> >* data_po
 
 	// return initial_centres;
 
-	srand(5);
 
 	// k-means++
+	// cout << "Initial cluster centre indices" << endl;
 	vector<int> indices;
 	int num_points = (*data_points).size();
 	int first = rand()%num_points;
 	indices.push_back(first);
-	cout << first << endl;
+	// cout << first << endl;
 
-	float total_dist = 0.0;
+
 	while(indices.size() != k)
 	{
 		vector<float> distances;
-		int total_dist = 0;
+		float total_dist = 0;
 		for(int i = 0; i < num_points; i ++)
 		{
 			if(find(indices.begin(), indices.end(), i) != indices.end()) //if that point is already a centre
 				continue;
 
 			vector<float> point = (*data_points)[i];
-			float min_dist = calc_dist(point, (*data_points)[indices[0]]);
+			float min_dist = calc_dist(point, (*data_points)[indices[0]]); //from 0th center
 
 			for(int j = 1; j < indices.size(); j++)
 			{
@@ -162,19 +173,21 @@ vector<vector<float> > initialize_centres(int k, vector<vector<float> >* data_po
 
 		vector<float> cum_dist;
 		cum_dist.push_back(0.0);
+
 		double r = ((double) rand() / (RAND_MAX));
 		// cout << "r = " << r << endl;
-		for(int i = 1; i < num_points; i++)
+
+		for(int i = 0; i < num_points; i++)
 		{
 			
-			cum_dist.push_back(cum_dist[i-1] + float(distances[i]/total_dist) );
-			// cout << cum_dist[i] << endl;
+			cum_dist.push_back(cum_dist[i] + float(distances[i]/total_dist) );
 			if(find(indices.begin(), indices.end(), i) != indices.end()) //if that point is already a centre
 				continue;
-			if(r <= cum_dist[i])
+
+			if(r <= cum_dist[i+1])
 			{
 				indices.push_back(i);
-				cout << i << endl;
+				// cout << i << " dist " << cum_dist[i+1] << endl;
 				break;
 			}
 		}
@@ -203,7 +216,7 @@ bool assign_clusters(vector<vector<float> >* data_points, vector<vector<float> >
 	
 	for(i = 0; i < num_points; i ++) //for each point
 	{
-		float min_dist = calc_dist((*data_points)[i], (*centres)[0]);
+		float min_dist = calc_dist((*data_points)[i], (*centres)[0]); //initially assign it cluster 0
 		int new_cluster = 0;
 		for(j = 1; j < k; j++)
 		{
@@ -251,18 +264,21 @@ void update_centres(vector<vector<float> >* centres, vector<int>* cluster_assign
 	{
 		int cluster = (*cluster_assignments)[i];
 		points_per_cluster[cluster] += 1;
-		transform(new_centres[cluster].begin(), new_centres[cluster].end(), (*data_points)[i].begin(), new_centres[cluster].begin(), plus<int>());
+		transform(new_centres[cluster].begin(), new_centres[cluster].end(), (*data_points)[i].begin(), new_centres[cluster].begin(), plus<float>());
 	}
+
 	for(int i = 0; i < k; i ++)
 	{
 		for(int j = 0; j < dimension; j ++)
 		{
 			new_centres[i][j] = new_centres[i][j] / points_per_cluster[i];
+			(*centres)[i][j] = new_centres[i][j];
 		}
 		// transform(new_centres[i].begin(), new_centres[i].end(), new_centres[i].begin(), bind(multiplies<T>(), placeholder::_1, float(1.0/points_per_cluster[i]) ));
 	}
 
-	*data_points = new_centres;
+	// centres = &new_centres;
+	// *centres = new_centres;
 
 }
 
