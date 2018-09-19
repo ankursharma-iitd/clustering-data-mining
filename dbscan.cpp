@@ -14,6 +14,7 @@ double get_distance(int one, int two);
 void initialise_neighbourhood(double epsilon);
 bool expand_cluster(int p, int cluster_label, double epsilon, int min_points);
 void delete_vector(vector<int> &v, int value);
+void print_vector(vector<int> vec);
 
 #define UNCLASSIFIED -2
 #define NOISE -1
@@ -187,6 +188,7 @@ bool expand_cluster(int p, int cluster_label, double epsilon, int min_points)
     point_map[p]->neighbour_number += seeds.size();
     if (point_map[p]->neighbour_number < min_points)
     {
+        // cout << "1.9" << endl;
         point_map[p]->label_number = NOISE;
         return false;
     }
@@ -194,19 +196,24 @@ bool expand_cluster(int p, int cluster_label, double epsilon, int min_points)
     {
         point_map[p]->label_number = cluster_label;
         // cout << "2.0" << endl;
-        for (int neighbour : point_map[p]->neighbourhood)
+        // cout << "p : "  << p << endl;
+        vector<int> p_neighbours = point_map[p]->neighbourhood;
+        // print_vector(p_neighbours);
+        for (int neighbour : p_neighbours)
         {
             // cout << "2.01" << endl;
-            // cout << "neighbour" << neighbour << endl;
-            if (neighbour != p)
-            {
-                delete_vector(point_map[neighbour]->neighbourhood, p);
-            }
+            // cout << "neighbour : " << neighbour << endl;
+            // print_vector(point_map[neighbour]->neighbourhood);
+            delete_vector(point_map[neighbour]->neighbourhood, p);
+            // print_vector(point_map[neighbour]->neighbourhood);
         }
+
         retrieve_map[p] = point_map[p]->label_number; //this will help to retrieve it back later
         point_map.erase(p);
+        // cout << "point deleted from D : " << p << endl;
         // cout << "2.1" << endl;
         delete_vector(seeds, p);
+        // cout << "point deleted from seeds : " << p << endl;
         // cout << "2.2" << endl;
         for (int q : seeds)
         {
@@ -224,14 +231,21 @@ bool expand_cluster(int p, int cluster_label, double epsilon, int min_points)
         // cout << "2.3" << endl;
         while (seeds.size() > 0)
         {
+            // cout << "seeds.size() : " << seeds.size() << endl;
+            // print_vector(seeds);
             int curPoint = seeds[0];
+            // cout << "curPoint : " << curPoint << endl;
             vector<int> curSeeds = point_map[curPoint]->neighbourhood;
+            // cout << "curSeeds.size() : " << curSeeds.size() << endl;
             point_map[curPoint]->neighbour_number += curSeeds.size();
             // cout << "2.4" << endl;
             if (point_map[curPoint]->neighbour_number >= min_points)
             {
+                // cout << "2.44" << endl;
                 for (int q : curSeeds)
                 {
+                    // cout << "q : " << q << endl;
+                    // cout << "2.45" << endl;
                     if (point_map[q]->label_number == UNCLASSIFIED)
                     {
                         point_map[q]->label_number = cluster_label;
@@ -244,18 +258,22 @@ bool expand_cluster(int p, int cluster_label, double epsilon, int min_points)
                     }
                 }
                 // cout << "2.5" << endl;
-                for (int neighbour : point_map[curPoint]->neighbourhood)
+                // cout << "curPoint : " << curPoint << endl;
+                vector<int> curPoint_neighbours = point_map[curPoint]->neighbourhood;
+                for (int neighbour : curPoint_neighbours)
                 {
-                    if (neighbour != curPoint)
-                    {
-                        delete_vector(point_map[neighbour]->neighbourhood, curPoint);
-                    }
+                    // cout << "neighbour : " << neighbour << endl;
+                    // print_vector(point_map[neighbour]->neighbourhood);
+                    delete_vector(point_map[neighbour]->neighbourhood, curPoint);
+                    // print_vector(point_map[neighbour]->neighbourhood);
                 }
                 retrieve_map[curPoint] = point_map[curPoint]->label_number;
                 point_map.erase(curPoint);
+                // cout << "point deleted from point_map : " << curPoint << endl;
                 // cout << "2.6" << endl;
             }
             delete_vector(seeds, curPoint);
+            // cout << "point deleted from seeds : " << curPoint << endl;
             // cout << "2.7" << endl;
         }
         // cout << "2.8" << endl;
@@ -263,14 +281,17 @@ bool expand_cluster(int p, int cluster_label, double epsilon, int min_points)
     }
 }
 
-void delete_vector(vector<int> &v, int value)
+void delete_vector(vector<int> &vec, int value)
 {
-    for (vector<int>::iterator iter = v.begin(); iter != v.end(); ++iter)
+    vec.erase(std::remove(vec.begin(), vec.end(), value), vec.end());
+}
+
+void print_vector(vector<int> vec)
+{
+    for(int something :  vec)
     {
-        if (*iter == value)
-        {
-            v.erase(iter);
-            break;
-        }
+        cout << something << " ";
     }
+    cout << endl;
+    return;
 }
