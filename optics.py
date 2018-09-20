@@ -8,34 +8,38 @@ from matplotlib import pyplot as plt
 
 def optics(filename, eps, minPts):
     output = []
+    indices = []
     DB = np.loadtxt(filename)
     ckdtree = spatial.cKDTree(DB, copy_data=True)
     DB = np.hstack((DB, np.zeros((DB.shape[0], 1)))) # column - whether it is processed
     DB = np.hstack((DB, np.full((DB.shape[0], 1), np.inf))) # column - reachability_distances (initialize with undefined/inf)
 
     for i, p in enumerate(DB):
+        print(i)
         if p[-2] == 1:
             continue
         N = get_neighbours(p, eps, DB, kd_tree=ckdtree)
         p[-2] = 1
         output.append(p)
+        indices.append(i)
         core_dist_p = core_dist(p, eps, minPts, DB, ckdtree, N)
         if core_dist_p != -1:
             seeds = PriorityQueue()
             update(N, p, seeds, core_dist_p, DB)
             while True:
                 try:
-                    q = DB[seeds.pop_task()]
+                    q_idx = seeds.pop_task()
+                    q = DB[q_idx]
                 except KeyError:
                     break
                 N_prime = get_neighbours(q, eps, DB, kd_tree=ckdtree)
                 q[-2] = 1
                 output.append(q)
+                indices.append(q_idx)
                 core_dist_q = core_dist(q, eps, minPts, DB, ckdtree, N_prime)
                 if core_dist_q != -1:
                     update(N_prime, q, seeds, core_dist_q, DB)
-        print(i)
-    return output
+    return output, indices
 
 
 def get_neighbours(p, eps, DB, kd_tree):
@@ -102,10 +106,17 @@ class PriorityQueue:
         raise KeyError('pop from an empty priority queue')
 
 
+# def extract_clusters(reach_distances, t):
+#     steep_upward_pts = [idx for idx, dist in enumerate(reach_distances) if reach_distances[idx] <= (1-t)*reach_distances[idx+1] and idx < len(reach_distances - 1)]
+#     steep_downward_pts = [idx for idx, dist in enumerate(reach_distances) if reach_distances[idx] >= (1+t)*reach_distances[idx+1] and idx < len(reach_distances - 1)]
+#
+#     sua = []
+#     sda = []
+
 filename = sys.argv[1]
 epsilon = float(sys.argv[2])
 minPts = int(sys.argv[3])
-ordering = optics(filename, epsilon, minPts)
+ordering, indices = optics(filename, epsilon, minPts)
 reach_distances = [x[3] for x in ordering]
 
 plt.figure()
@@ -114,4 +125,9 @@ plt.title("Reachability plot for eps = " + str(epsilon) + ", minPts = " + str(mi
 plt.xlabel("Point")
 plt.ylabel("Reachability Distance")
 plt.show()
+
+outfile = open("indices.txt", "w")
+for i in indices:
+    outfile.write(str(i) + "\n" )
+outfile.close()
 
