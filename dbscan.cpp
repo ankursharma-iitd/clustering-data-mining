@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <sstream>
 #include <cmath>
-#include <nanoflann.hpp>
+#include "nanoflann.hpp"
 #include <ctime>
 #include <cstdlib>
 #include "KDTreeVectorOfVectorsAdaptor.h"

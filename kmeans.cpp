@@ -1,4 +1,15 @@
-#include <bits/stdc++.h>
+// #include <bits/stdc++.h>
+#include <iostream>
+#include <unordered_map>
+#include <set>
+#include <vector>
+#include <fstream>
+#include <algorithm>
+#include <sstream>
+#include <cmath>
+#include "nanoflann.hpp"
+#include <ctime>
+#include <cstdlib>
 using namespace std;
 
 vector<vector<float> > initialize_centres(int k, vector<vector<float> >* data_points);
@@ -57,6 +68,7 @@ int main(int argc, char* argv[])
 	
 	while(true)
 	{
+		cout << "iter..." << num_iter << endl;
 		// assign clusters
 		converged = assign_clusters(&data_points, &centres, &cluster_assignments);
 		if(converged)
@@ -84,25 +96,27 @@ int main(int argc, char* argv[])
 		final_assignments[cluster].push_back(i);
 	}
 
-	// ofstream o_file;
-	// o_file.open(output_file);
-	// for(int i = 0; i < k; i ++)
-	// {
-	// 	o_file << "#" << i << endl;
-	// 	for(int j = 0; j < final_assignments[i].size(); j++)
-	// 	{
-	// 		o_file << final_assignments[i][j] << endl;
-	// 	}
-	// }
-	// o_file.close();
-
-	ofstream check_file;
-	check_file.open("kmeans_labels.txt");
-	for(int i = 0; i < num_points; i ++)
+	ofstream o_file;
+	o_file.open(output_file);
+	for(int i = 0; i < k; i ++)
 	{
-		check_file << cluster_assignments[i] << endl;
+		o_file << "#" << i << endl;
+		for(int j = 0; j < final_assignments[i].size(); j++)
+		{
+			o_file << final_assignments[i][j] << endl;
+		}
 	}
-	check_file.close();
+	o_file.close();
+
+	// ofstream check_file;
+	// check_file.open("kmeans_labels.txt");
+	// for(int i = 0; i < num_points; i ++)
+	// {
+	// 	check_file << cluster_assignments[i];
+	// 	if(i != num_points-1)
+	// 		check_file << endl;
+	// }
+	// check_file.close();
 
 
 

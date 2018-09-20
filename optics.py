@@ -43,14 +43,14 @@ def optics(filename, eps, minPts):
 
 
 def get_neighbours(p, eps, DB, kd_tree):
-    return kd_tree.query_ball_point(p[:-2], eps)
+    return kd_tree.query_ball_point(p[:-2], eps, n_jobs = -1)
 
 
 def core_dist(p, eps, minPts, DB, kd_tree, nbrs):
     if len(nbrs) < minPts:
         return -1
     else:
-        dd, ii = kd_tree.query(p[:-2], k=[minPts-1])
+        dd, ii = kd_tree.query(p[:-2], k=[minPts-1], n_jobs = -1)
         return dd
 
 
