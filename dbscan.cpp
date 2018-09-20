@@ -95,9 +95,9 @@ void run_dbscan(int min_points, double epsilon, const string input_file_name, co
     int cluster_label = 0;
     for (int i = 1; i <= number_of_points; i++)
     {
-        cout << "CURRENT POINT : " << i << endl;
         if (point_map.find(i) != point_map.end() && point_map[i]->label_number == UNCLASSIFIED)
         {
+            cout << "CURRENT POINT : " << i << endl;
             if (expand_cluster(i, cluster_label, epsilon, min_points))
             {
                 cluster_label ++;
