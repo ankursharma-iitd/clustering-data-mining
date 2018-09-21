@@ -1,3 +1,4 @@
 #!/bin/bash
 
-pip3 install numpy scipy scikit-learn matplotlib shapely
+git clone https://github.com/ankursharma-iitd/clustering-data-mining.git
+pip3 install -U numpy scipy scikit-learn matplotlib shapely
